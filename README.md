@@ -15,20 +15,20 @@ All configuration is in `config.js`:
 
 **Endpoint:** `/getEventsByUserId/:id`  
 **Issue:** Sequential fetching caused slowness for users with many events  
-**Solution:** Events fetched in parallel with `Promise.all()` respecting the mock server's intentional delays  
-**Benefit:** Faster responses for users with multiple events  
+**Fix:** Events fetched in parallel with `Promise.all()` respecting the mock server's intentional delays  
+**Result:** Faster responses for users with multiple events  
 
 ### Resilience Improvements
 
 **Endpoint:** `/addEvent`  
 **Issue:** External service `http://event.com/addEvent` fails under load  
-**Solution:**  
+**Fix:**  
 - Tracks failures in a `failureLog` array  
 - If 3+ failures occur within 30 seconds:
   - Apply backoff delay (`retry.backoffMs`) before sending more requests  
   - Reduces load on the external service during failure periods  
 - Clients receive HTTP 500 with error details if the service is unavailable  
-**Benefit:** Handles external service instability gracefully and avoids cascading failures  
+**Result:** Handles external service instability gracefully and avoids cascading failures  
 
 **Sample Failure Flow:**  
 1. Client POSTs to `/addEvent` with payload: `{ "userId": 1, "name": "New Event", "details": "Event details" }`  
@@ -43,9 +43,11 @@ Limits simultaneous outgoing calls to the mock server (configured in `config.js`
 
 ## Future Improvements
 
-- IP-based rate limiting to prevent API abuse  
+- IP-based rate limiting to prevent API abuse
+- In-memory data store to cache recent requests to offload MSW API to prevent failures, overloading, and performance degredation  
 - Pagination for `/getUsers` and `/getEvents` for large datasets  
-- Advanced circuit breaker for `/addEvent` to pause requests during persistent failures and probe recovery  
+- Advanced circuit breaker for `/addEvent` to pause requests during persistent failures and probe recovery
+- Testing expectations and assertions of our service to check code coverage, performance, and intended behavior 
 
 ## How to Run
 
